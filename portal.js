@@ -3,7 +3,7 @@
 (function () {
   const DATA = window.CASE_DATA;
   const STORAGE_KEY = 'case-25-10-4471';
-  const HINT_LABELS = ['Hint 1', 'Hint 2', 'Hint 3 (gives the answer)'];
+  const HINT_LABELS = ['Indice 1', 'Indice 2', 'Indice 3 (donne la réponse)'];
 
   const bytes = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
   const text = (b64) => new TextDecoder().decode(bytes(b64));
@@ -72,7 +72,7 @@
 
     const lockedNote = document.createElement('p');
     lockedNote.className = 'locked-note';
-    lockedNote.textContent = `Confirm Envelope ${data.id - 1} first.`;
+    lockedNote.textContent = `Confirmez d'abord l'enveloppe ${data.id - 1}.`;
     lockedNote.hidden = true;
     section.append(lockedNote);
 
@@ -104,7 +104,7 @@
         const div = document.createElement('div');
         div.className = 'hint';
         const label = document.createElement('b');
-        label.textContent = `Hint ${i + 1}`;
+        label.textContent = `Indice ${i + 1}`;
         div.append(label, text(h));
         shown.append(div);
       });
@@ -134,7 +134,7 @@
         }
         submit.disabled = true;
         const clock = Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0');
-        feedback.textContent = `${message} Next attempt in ${clock}.`.trim();
+        feedback.textContent = `${message} Prochain essai dans ${clock}.`.trim();
       };
       tick();
       if (submit.disabled) timer = setInterval(tick, 1000);
@@ -146,11 +146,11 @@
       feedback.textContent = '';
       const answer = readAnswer(section, data.id);
       if (data.id === 2 && answer.split('+').length !== 2) {
-        feedback.textContent = 'Select exactly two players.';
+        feedback.textContent = 'Choisissez exactement deux joueurs.';
         return;
       }
       if (!window.crypto || !crypto.subtle) {
-        feedback.textContent = 'This page must be opened over https.';
+        feedback.textContent = 'Cette page doit être ouverte en https.';
         return;
       }
       submit.disabled = true;
@@ -168,7 +168,7 @@
         const seconds = COOLDOWN_SECONDS[Math.min(wrong, COOLDOWN_SECONDS.length) - 1];
         cooldowns[data.id] = { wrong, until: Date.now() + seconds * 1000 };
         saveCooldowns();
-        runCooldown('Not confirmed. That conclusion does not fit the evidence.');
+        runCooldown('Non confirmé. Cette conclusion ne concorde pas avec la preuve.');
       }
     });
 

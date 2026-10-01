@@ -1,98 +1,98 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
-  <title>Case 25-10-4471 · Consulting Detective Portal</title>
+  <title>Dossier 25-10-4471 · Portail d'enquête</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="masthead">
-    <div class="unit">Major Crimes Unit</div>
-    <h1>Case 25-10-4471 — Caron, Julien</h1>
-    <div class="sub">Consulting detective portal</div>
+    <div class="unit">Section des crimes majeurs</div>
+    <h1>Dossier 25-10-4471 — Caron, Julien</h1>
+    <div class="sub">Portail de consultation pour un deuxième avis</div>
   </header>
 
   <main>
     <section class="brief">
-      <p>Det. Sgt. Lavoie has asked for a second opinion on this file. Each envelope carries one question. Submit your conclusion here; when it is confirmed, open the next envelope.</p>
-      <p>Stuck? Each envelope has three hints. The first points you to the right documents, the second tells you how to combine them, and the third gives the answer.</p>
+      <p>Le sgt-dét. Lavoie a demandé un deuxième avis sur ce dossier. Chaque enveloppe pose une question. Soumettez votre conclusion ici ; quand elle est confirmée, ouvrez l'enveloppe suivante.</p>
+      <p>Dans une impasse ? Chaque enveloppe a trois indices. Le premier vous dirige vers les bons documents, le deuxième vous dit comment les combiner, et le troisième donne la réponse.</p>
     </section>
 
     <section class="case" data-case="1">
-      <h2><span class="tag">Envelope 1</span> The crime scene</h2>
-      <p class="question">At what time did Julien Caron die?</p>
+      <h2><span class="tag">Enveloppe 1</span> La scène de crime</h2>
+      <p class="question">À quelle heure Julien Caron est-il mort ?</p>
       <form>
-        <label for="a1">Time of death (24-hour clock)</label>
+        <label for="a1">Heure du décès (sur 24 heures)</label>
         <div class="row">
           <input id="a1" type="time" required>
-          <button type="submit">Submit</button>
+          <button type="submit">Soumettre</button>
         </div>
       </form>
     </section>
 
     <section class="case" data-case="2">
-      <h2><span class="tag">Envelope 2</span> The suspects</h2>
-      <p class="question">Which two players lied about going home after the session?</p>
+      <h2><span class="tag">Enveloppe 2</span> Les suspects</h2>
+      <p class="question">Quels sont les deux joueurs qui ont menti sur leur retour à la maison après la séance ?</p>
       <form>
         <fieldset>
-          <legend>Select exactly two</legend>
+          <legend>Choisissez-en exactement deux</legend>
           <label><input type="checkbox" name="a2" value="etienne"> Étienne Marchand</label>
           <label><input type="checkbox" name="a2" value="karine"> Karine Dubé</label>
           <label><input type="checkbox" name="a2" value="maude"> Maude Lefebvre</label>
           <label><input type="checkbox" name="a2" value="samuel"> Samuel Pratte</label>
         </fieldset>
-        <button type="submit">Submit</button>
+        <button type="submit">Soumettre</button>
       </form>
     </section>
 
     <section class="case" data-case="3">
-      <h2><span class="tag">Envelope 3</span> The campaign</h2>
-      <p class="question">In the campaign, who emptied the Vault of Dawn?</p>
+      <h2><span class="tag">Enveloppe 3</span> La campagne</h2>
+      <p class="question">Dans la campagne, qui a vidé le Trésor de l'Aube ?</p>
       <form>
         <fieldset>
-          <legend>Select one</legend>
-          <label><input type="radio" name="a3" value="highpriest" required> The High Priest, Maelis Thorne</label>
-          <label><input type="radio" name="a3" value="quartermaster"> The Quartermaster, Hobb Tallow</label>
-          <label><input type="radio" name="a3" value="champion"> The Champion, Ser Aldric</label>
-          <label><input type="radio" name="a3" value="finch"> Finch, the rogue</label>
-          <label><input type="radio" name="a3" value="cult"> The Cult of the Hollow Sun</label>
+          <legend>Choisissez une réponse</legend>
+          <label><input type="radio" name="a3" value="highpriest" required> Le Grand Prêtre, Maelis Thorne</label>
+          <label><input type="radio" name="a3" value="quartermaster"> L'Intendant, Hobb Tallow</label>
+          <label><input type="radio" name="a3" value="champion"> Le Champion, Ser Aldric</label>
+          <label><input type="radio" name="a3" value="finch"> Finch, le roublard</label>
+          <label><input type="radio" name="a3" value="cult"> Le Culte du Soleil creux</label>
         </fieldset>
-        <button type="submit">Submit</button>
+        <button type="submit">Soumettre</button>
       </form>
     </section>
 
     <section class="case" data-case="4">
-      <h2><span class="tag">Envelope 4</span> The DM's secrets</h2>
-      <p class="question">Who killed Julien Caron, and why?</p>
+      <h2><span class="tag">Enveloppe 4</span> Les secrets du DM</h2>
+      <p class="question">Qui a tué Julien Caron, et pourquoi ?</p>
       <form>
-        <label for="a4who">Who</label>
+        <label for="a4who">Qui</label>
         <select id="a4who" required>
-          <option value="">Choose a suspect</option>
+          <option value="">Choisissez un suspect</option>
           <option value="etienne">Étienne Marchand</option>
           <option value="karine">Karine Dubé</option>
           <option value="maude">Maude Lefebvre</option>
           <option value="samuel">Samuel Pratte</option>
         </select>
-        <label for="a4why">Why</label>
+        <label for="a4why">Pourquoi</label>
         <select id="a4why" required>
-          <option value="">Choose a motive</option>
-          <option value="character">Revenge for the death of a character</option>
-          <option value="die">To recover a confiscated die and avoid being reported for cheating</option>
-          <option value="money">To stop Julien exposing money taken from the games club</option>
-          <option value="presidency">To take Julien's place as president of the club</option>
-          <option value="rules">An argument about a rule that went too far</option>
-          <option value="authorship">To stop Julien publishing the campaign under his name alone</option>
+          <option value="">Choisissez un mobile</option>
+          <option value="character">Pour venger la mort d'un personnage</option>
+          <option value="die">Pour récupérer un dé confisqué et éviter d'être dénoncé pour tricherie</option>
+          <option value="money">Pour empêcher Julien de révéler de l'argent pris au club de jeux</option>
+          <option value="presidency">Pour prendre la place de Julien à la présidence du club</option>
+          <option value="rules">Une dispute sur une règle qui est allée trop loin</option>
+          <option value="authorship">Pour empêcher Julien de publier la campagne sous son seul nom</option>
         </select>
-        <button type="submit">Submit</button>
+        <button type="submit">Soumettre</button>
       </form>
     </section>
 
-    <p class="reset"><button type="button" id="reset">Erase my progress on this device</button></p>
+    <p class="reset"><button type="button" id="reset">Effacer ma progression sur cet appareil</button></p>
   </main>
 
-  <footer>This portal is part of a game. Any resemblance to real cases, clubs or dungeon masters is coincidental.</footer>
+  <footer>Ce portail fait partie d'un jeu. Toute ressemblance avec des enquêtes, des clubs ou des maîtres de jeu réels est fortuite.</footer>
 
   <script src="data.js"></script>
   <script src="portal.js"></script>
