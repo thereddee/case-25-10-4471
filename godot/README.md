@@ -36,6 +36,34 @@ l'écran titre. Les trois scènes ne se connaissent pas ; seul `Main` les conna�
 | `scene_holder`, `fade_overlay` | NodePath | |
 | `pause_menu` | NodePath | Optionnel ; Main l'active en entrant dans la salle, le désactive ailleurs |
 | `settings_menu` | NodePath | Optionnel ; ouvert sur `settings_requested` du titre ou de la pause. Sans lui, Main applique quand même les volumes sauvegardés |
+| `autosave` | `true` | Faux = lecture seule, aucune écriture |
+| `save_slot` | `save` | Fichier `user://<save_slot>.json` |
+
+## Sauvegarde (`scripts/save_data.gd`, `scripts/save_store.gd`)
+
+La progression est écrite en JSON dans `user://save.json` (emplacement changeable via
+`Main.save_slot`). `SaveData` porte les champs ; `SaveStore` lit, écrit et efface. On évite
+`ResourceSaver` : charger une Resource depuis `user://` peut exécuter du script embarqué, un
+JSON non.
+
+| Champ | Contenu |
+|---|---|
+| `collected_evidence` | ids des preuves, dans l'ordre |
+| `fired_triggers` | zones `one_shot` déjà déclenchées (la sortie n'y est jamais, pour pouvoir ressortir) |
+| `player_position` / `has_player_position` | dernière position dans la salle |
+| `case_closed` | vrai une fois la solution scellée atteinte |
+| `saved_at` | horodatage de la dernière écriture |
+| `version` | `SaveData.FORMAT_VERSION`, pour migrer plus tard |
+
+Cycle : `Main` charge au démarrage et à chaque retour au titre ; l'écran titre affiche alors
+« Reprendre l'enquête » + « Nouvelle enquête » (qui efface le fichier) et un résumé
+(« 3 preuves · dossier clos · date »). En entrant dans la salle, `GameRoom.restore_state()`
+rejoue l'état sans dialogue ni son : preuves dans le journal, objets `one_shot` consommés, zones
+marquées, joueur replacé. `GameRoom.state_changed` (preuve collectée, zone `one_shot`) déclenche
+`_autosave` via `capture_state()` ; on sauvegarde aussi à la sortie de la salle, au retour au titre
+depuis la pause et sur `NOTIFICATION_WM_CLOSE_REQUEST`. `Main.autosave = false` coupe toute
+écriture. La salle ne touche jamais au disque : elle expose `capture_state` / `restore_state`
+et les signaux `state_changed` / `state_restored`.
 
 ## Menu pause (`scenes/pause_menu.tscn`)
 
@@ -98,14 +126,18 @@ TitleScreen (Control)                           title_screen.gd
     ├── Unit (Label)                            « Section des crimes majeurs »
     ├── Title (Label)                           « Dossier 25-10-4471 — Caron, Julien »
     ├── Subtitle (Label)
-    ├── StartButton (Button)                    « Ouvrir le dossier »
+    ├── SaveInfo (Label)                        résumé de la sauvegarde, caché sans elle
+    ├── StartButton (Button)                    « Ouvrir le dossier » / « Reprendre l'enquête »
+    ├── NewGameButton (Button)                  « Nouvelle enquête », visible avec une sauvegarde
     ├── SettingsButton (Button)                 « Paramètres »
     ├── QuitButton (Button)                     masqué si OS.has_feature("web")
     └── Hint (Label)
 ```
 
-Signaux : `start_requested`, `settings_requested`, `quit_requested`. Textes et libellés sont des
-`@export` (`unit_text`, `title_text`, `subtitle_text`, `start_label`, `settings_label`, `quit_label`) ; `start_on_interact`
+Signaux : `start_requested`, `new_game_requested`, `settings_requested`, `quit_requested`.
+`Main` appelle `set_save_info(has_save, summary)` pour basculer les libellés. Textes et libellés
+sont des `@export` (`unit_text`, `title_text`, `subtitle_text`, `start_label`, `continue_label`,
+`new_game_label`, `settings_label`, `quit_label`) ; `start_on_interact`
 permet de lancer avec E / Entrée. Les nœuds UI sont des NodePath optionnels.
 
 ## Solution scellée (`scenes/sealed_solution.tscn`)
@@ -194,6 +226,8 @@ GameRoom (Node2D)                               game_room.gd  — racine, état 
 | `pause_menu.gd` | `PauseMenu` | Menu pause (Échap) ; Reprendre, Paramètres, Retour au titre. |
 | `settings_menu.gd` | `SettingsMenu` | Menu Paramètres ; sliders Général / Musique / Effets. |
 | `audio_settings.gd` | `AudioSettings` (RefCounted) | Volumes des bus, persistés dans `user://settings.cfg`. |
+| `save_data.gd` | `SaveData` (RefCounted) | État d'une partie, sérialisable en Dictionary. |
+| `save_store.gd` | `SaveStore` (RefCounted) | Lecture / écriture / effacement JSON dans `user://`. |
 | `sealed_solution.gd` | `SealedSolution` | Écran de la solution ; sceau, révélation ligne par ligne. |
 | `solution_data.gd` | `SolutionData` (Resource) | Verdict, chronologie et citation de la solution. |
 
@@ -204,7 +238,8 @@ formate `description` avec `build_format_context()`, ouvre le dialogue, collecte
 
 Signaux exposés par la racine pour le reste du jeu (autoload, gestionnaire de scènes) :
 `evidence_collected(id, total, maximum)`, `all_evidence_collected`, `room_exited(exit_id)`,
-`dialogue_opened(speaker, text)`, `dialogue_closed`.
+`dialogue_opened(speaker, text)`, `dialogue_closed`, `state_changed`, `state_restored`.
+Sauvegarde : `capture_state(SaveData)` / `restore_state(SaveData)`.
 
 ## Paramètres d'inspecteur
 

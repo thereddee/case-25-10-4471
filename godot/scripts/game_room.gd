@@ -20,6 +20,10 @@ signal room_exited(exit_id: StringName)
 signal dialogue_opened(speaker: String, text: String)
 ## Émis à la fermeture de la boîte de dialogue.
 signal dialogue_closed
+## Émis quand quelque chose vaut la peine d'être sauvegardé (preuve, zone one_shot).
+signal state_changed
+## Émis après restore_state().
+signal state_restored
 
 @export_group("Dossier")
 ## Liste de lecture du téléphone ; calcule l'heure réelle du décès.
@@ -72,6 +76,10 @@ signal dialogue_closed
 var _collected: Array[StringName] = []
 ## Toutes les preuves présentes dans la salle (déduites des Interactable au _ready).
 var _all_evidence_ids: Array[StringName] = []
+## id de preuve -> Interactable qui la porte.
+var _interactables_by_evidence: Dictionary = {}
+## Zones one_shot déjà déclenchées (hors sortie), pour la sauvegarde.
+var _fired_triggers: Array[StringName] = []
 var _dialogue_open := false
 
 
@@ -116,6 +124,38 @@ func evidence_total() -> int:
 ## Vrai tant qu'une boîte de dialogue est affichée.
 func is_dialogue_open() -> bool:
 	return _dialogue_open
+
+
+## Copie l'état courant dans `data` (preuves, zones, position du joueur).
+func capture_state(data: SaveData) -> void:
+	data.collected_evidence = _collected.duplicate()
+	data.fired_triggers = _fired_triggers.duplicate()
+	if player:
+		data.player_position = player.global_position
+		data.has_player_position = true
+
+
+## Rejoue un état sauvegardé sans dialogue ni son. À appeler après l'entrée dans l'arbre.
+func restore_state(data: SaveData) -> void:
+	for id in data.collected_evidence:
+		if not _all_evidence_ids.has(id) or _collected.has(id):
+			continue
+		_collected.append(id)
+		var interactable: Interactable = _interactables_by_evidence.get(id)
+		if interactable:
+			interactable.mark_used()
+			if evidence_list:
+				evidence_list.add_item(interactable.evidence.title, interactable.evidence.icon)
+	for node in _children_of(triggers_root):
+		var trigger := node as RoomTrigger
+		if trigger and data.fired_triggers.has(trigger.trigger_id):
+			trigger.mark_fired()
+			if not _fired_triggers.has(trigger.trigger_id):
+				_fired_triggers.append(trigger.trigger_id)
+	if player and data.has_player_position:
+		player.global_position = data.player_position
+	_refresh_counter()
+	state_restored.emit()
 
 
 ## Progression de l'enquête dans [0, 1].
@@ -198,6 +238,7 @@ func _wire_interactables() -> void:
 				push_warning("GameRoom : id de preuve dupliqué « %s »." % interactable.evidence.id)
 			else:
 				_all_evidence_ids.append(interactable.evidence.id)
+				_interactables_by_evidence[interactable.evidence.id] = interactable
 
 
 func _wire_triggers() -> void:
@@ -281,6 +322,10 @@ func _on_trigger_entered(trigger: RoomTrigger) -> void:
 		return
 
 	trigger.mark_fired()
+	# La sortie n'est jamais mémorisée : on doit pouvoir ressortir après un rechargement.
+	if trigger.one_shot and trigger.trigger_id != exit_trigger_id and not _fired_triggers.has(trigger.trigger_id):
+		_fired_triggers.append(trigger.trigger_id)
+		state_changed.emit()
 	if trigger.enter_text != "":
 		open_dialogue(narrator_name, trigger.enter_text.format(build_format_context()))
 	if trigger.trigger_id == exit_trigger_id:
@@ -302,6 +347,7 @@ func _collect(evidence: EvidenceData) -> void:
 		evidence_list.add_item(evidence.title, evidence.icon)
 	_refresh_counter()
 	evidence_collected.emit(evidence.id, _collected.size(), _all_evidence_ids.size())
+	state_changed.emit()
 	if _collected.size() >= _all_evidence_ids.size():
 		all_evidence_collected.emit()
 

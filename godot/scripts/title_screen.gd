@@ -8,13 +8,17 @@ extends Control
 ##       ├── Unit (Label)        -- « Section des crimes majeurs »
 ##       ├── Title (Label)       -- « Dossier 25-10-4471 — Caron, Julien »
 ##       ├── Subtitle (Label)
-##       ├── StartButton (Button)
+##       ├── SaveInfo (Label)    -- « 3 preuves sur 8 · 2026-10-24 14:02 »
+##       ├── StartButton (Button)   -- « Ouvrir le dossier » ou « Reprendre l'enquête »
+##       ├── NewGameButton (Button) -- visible seulement avec une sauvegarde
 ##       ├── SettingsButton (Button)
 ##       ├── QuitButton (Button) -- masqué automatiquement sur le web
 ##       └── Hint (Label)
 
-## Émis quand le joueur lance l'enquête.
+## Émis quand le joueur lance ou reprend l'enquête (Main décide selon la sauvegarde).
 signal start_requested
+## Émis quand le joueur veut repartir de zéro ; Main efface la sauvegarde.
+signal new_game_requested
 ## Émis quand le joueur ouvre les paramètres.
 signal settings_requested
 ## Émis quand le joueur veut quitter le jeu.
@@ -24,6 +28,8 @@ signal quit_requested
 @export var title_text: String = "Dossier 25-10-4471 — Caron, Julien"
 @export_multiline var subtitle_text: String = "Le sgt-dét. Lavoie a demandé un deuxième avis.\nLa scène est encore telle qu'on l'a trouvée."
 @export var start_label: String = "Ouvrir le dossier"
+@export var continue_label: String = "Reprendre l'enquête"
+@export var new_game_label: String = "Nouvelle enquête"
 @export var settings_label: String = "Paramètres"
 @export var quit_label: String = "Quitter"
 ## Si vrai, la touche « interact » / ui_accept lance aussi l'enquête.
@@ -33,12 +39,15 @@ signal quit_requested
 @export var unit_label: Label
 @export var title_label: Label
 @export var subtitle_label: Label
+@export var save_info_label: Label
 @export var start_button: Button
+@export var new_game_button: Button
 @export var settings_button: Button
 @export var quit_button: Button
 @export var hint_label: Label
 
 var _started := false
+var _has_save := false
 
 
 func _ready() -> void:
@@ -49,9 +58,12 @@ func _ready() -> void:
 	if subtitle_label:
 		subtitle_label.text = subtitle_text
 	if start_button:
-		start_button.text = start_label
 		start_button.pressed.connect(request_start)
 		start_button.grab_focus()
+	if new_game_button:
+		new_game_button.text = new_game_label
+		new_game_button.pressed.connect(request_new_game)
+	_refresh_save_ui()
 	if settings_button:
 		settings_button.text = settings_label
 		settings_button.pressed.connect(request_settings)
@@ -73,6 +85,24 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
+## Appelé par Main : adapte les boutons à la présence d'une sauvegarde.
+func set_save_info(has_save: bool, summary: String = "") -> void:
+	_has_save = has_save
+	if save_info_label:
+		save_info_label.text = summary
+		save_info_label.visible = has_save and summary != ""
+	_refresh_save_ui()
+
+
+func _refresh_save_ui() -> void:
+	if start_button:
+		start_button.text = continue_label if _has_save else start_label
+	if new_game_button:
+		new_game_button.visible = _has_save
+	if save_info_label and not _has_save:
+		save_info_label.visible = false
+
+
 ## Lance l'enquête (une seule fois, même si on appuie deux fois pendant le fondu).
 func request_start() -> void:
 	if _started:
@@ -80,6 +110,14 @@ func request_start() -> void:
 	_started = true
 	_set_buttons_enabled(false)
 	start_requested.emit()
+
+
+func request_new_game() -> void:
+	if _started:
+		return
+	_started = true
+	_set_buttons_enabled(false)
+	new_game_requested.emit()
 
 
 func request_settings() -> void:
@@ -99,6 +137,8 @@ func focus_default() -> void:
 func _set_buttons_enabled(enabled: bool) -> void:
 	if start_button:
 		start_button.disabled = not enabled
+	if new_game_button:
+		new_game_button.disabled = not enabled
 	if settings_button:
 		settings_button.disabled = not enabled
 	if quit_button:
