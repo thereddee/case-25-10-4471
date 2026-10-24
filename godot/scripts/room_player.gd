@@ -27,7 +27,14 @@ signal interact_requested(target: Node2D)
 ## Direction initiale du regard.
 @export var initial_facing: Vector2 = Vector2.DOWN
 
+## Si vrai, le Sprite pivote vers la direction du regard (sprite vu du dessus, dessiné regard vers le bas).
+@export var rotate_sprite: bool = true
+
+## Vitesse de rotation du Sprite, en radians/seconde.
+@export var turn_speed: float = 14.0
+
 @onready var _ray: RayCast2D = $InteractRay
+@onready var _sprite: Node2D = get_node_or_null(^"Sprite") as Node2D
 
 var _facing := Vector2.DOWN
 var _target: Node2D = null
@@ -36,9 +43,11 @@ var _target: Node2D = null
 func _ready() -> void:
 	_facing = initial_facing.normalized() if initial_facing != Vector2.ZERO else Vector2.DOWN
 	_ray.target_position = _facing * interact_distance
+	if rotate_sprite and _sprite:
+		_sprite.rotation = _facing_angle()
 
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if not can_move:
 		velocity = Vector2.ZERO
 		return
@@ -50,6 +59,8 @@ func _physics_process(_delta: float) -> void:
 		_ray.target_position = _facing * interact_distance
 	move_and_slide()
 	_update_target()
+	if rotate_sprite and _sprite:
+		_sprite.rotation = rotate_toward(_sprite.rotation, _facing_angle(), turn_speed * delta)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -68,6 +79,10 @@ func facing() -> Vector2:
 ## Cible actuellement visée (Interactable ou RoomNPC), ou null.
 func current_target() -> Node2D:
 	return _target
+
+
+func _facing_angle() -> float:
+	return _facing.angle() - PI / 2.0
 
 
 func _update_target() -> void:
