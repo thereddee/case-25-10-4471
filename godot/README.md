@@ -5,7 +5,8 @@ matin. Vue du dessus, point-and-click au clavier. Le joueur examine la pièce, L
 selon la progression, et la porte ne s'ouvre qu'une fois la statuette identifiée.
 
 Ouvrir ce dossier (`godot/`) comme projet dans Godot 4.3 ou plus récent et appuyer sur F5.
-Tout fonctionne avec des textures de remplacement (`PlaceholderTexture2D`) : aucun asset requis.
+La salle est pré-rendue en 3D (Blender + Cycles, voir « Rendus 3D de la salle » plus bas) ; les autres
+écrans n'utilisent aucun asset.
 
 ## Flux des scènes (`scenes/main.tscn`)
 
@@ -174,16 +175,14 @@ GameRoom (Node2D)                               game_room.gd  — racine, état 
 ├── Environment (Node2D)
 │   ├── FloorTiles (TileMapLayer)               TileSet 32×32 vide, prêt à peindre
 │   ├── WallTiles (TileMapLayer)                même TileSet ; physics layer 0 → calque World
-│   ├── FloorPlaceholder (Polygon2D)            plancher temporaire, z_index -10
-│   ├── Rug (Polygon2D)                         tapis sous la table
-│   ├── BloodStain (Polygon2D)                  tache à droite de la chaise du DM
+│   ├── Background (Sprite2D)                   rendu 3D de la pièce (art/room/background.png), z_index -10
 │   ├── WallColliders (StaticBody2D)            4 murs tant que WallTiles n'est pas peint
 │   │   ├── Top / Bottom / Left / Right (CollisionShape2D)
-│   └── Props (Node2D)                          meubles solides : StaticBody2D + Shape + Sprite
+│   └── Props (Node2D)                          meubles solides : StaticBody2D + Shape (visuel dans Background)
 │       ├── GameTable, DMChair, Shelf, Counter
 ├── Lighting (Node2D)
-│   ├── Ambient (CanvasModulate)                pénombre du matin
-│   ├── CeilingLamp (PointLight2D)              au-dessus de la table
+│   ├── Ambient (CanvasModulate)                léger voile froid ; l'éclairage principal est dans le rendu
+│   ├── CeilingLamp (PointLight2D)              au-dessus de la table, réchauffe les personnages qui passent
 │   └── StreetGlow (PointLight2D)               lumière froide par la fenêtre
 ├── Interactables (Node2D)                      un Interactable (Area2D) par pièce à conviction
 │   ├── PhonePlaylist, TreasuryLedger, DMNotebook, DMScreen, CharacterSheet  (sur la table)
@@ -286,7 +285,8 @@ et `RoomNPC.lines`. Ajouter une clé dans `build_format_context()` la rend dispo
 
 ### RoomPlayer
 
-`move_speed` (140 px/s), `interact_distance` (40 px), `can_move`, `initial_facing`.
+`move_speed` (140 px/s), `interact_distance` (40 px), `can_move`, `initial_facing`,
+`rotate_sprite` (le Sprite pivote vers le regard ; il est dessiné regard vers le bas), `turn_speed`.
 
 ### RoomNPC
 
@@ -314,12 +314,37 @@ Interactable `layer=8 mask=0` · Trigger `layer=16 mask=2` · NPC `layer=4 mask=
 `move_left/right/up/down` (WASD + flèches), `interact` (E), `toggle_log` (Tab), `pause` (Échap).
 L'invite affiche automatiquement la touche liée à `interact`.
 
+## Rendus 3D de la salle (`art/room/`, `../blender/build_room.py`)
+
+La pièce est modélisée dans Blender aux coordonnées exactes de `game_room.tscn` (1 px = 1 cm) et
+rendue avec Cycles en vue de dessus orthographique, au double de la résolution du jeu (2 px/cm).
+Chaque `Sprite2D` qui l'utilise a donc `scale = 0.5`.
+
+| Fichier | Contenu | Utilisé par |
+|---|---|---|
+| `background.png` (1280 × 896) | murs en coupe à 1,10 m, plancher, tapis, table, chaise, étagère, comptoir, sang, décor ; lumière du matin par la fenêtre + plafonnier | `Environment/Background` (`centered = false`) |
+| `items/<id>.png` | chaque preuve seule, fond transparent, avec son ombre sur la table ou le sol | `Interactables/*/Sprite` |
+| `characters/player.png`, `lavoie.png` | personnages vus de dessus, regard vers le bas | `Player/Sprite`, `NPCs/Lavoie/Sprite` (tourné vers la droite) |
+
+Les régions des preuves sont dans `ITEM_REGIONS` du script ; quand leur centre diffère de la position
+de l'Interactable (écran du DM, boîte de pizza, cartable), le `Sprite` est décalé d'autant. Déplacer
+un meuble ou une preuve = changer la constante dans le script **et** la position dans la scène, puis
+relancer le rendu :
+
+```
+python blender/build_room.py --out godot/art/room            # pip install bpy (Blender 5.x)
+blender -b -P blender/build_room.py -- --out godot/art/room  # ou avec Blender installé
+```
+
+Options : `--samples` (160 par défaut, ~6 min sur 4 cœurs), `--only background|items|characters`,
+`--item <id>`, `--save-blend salle.blend` pour ouvrir la scène dans Blender. Tous les matériaux sont
+procéduraux ; pour aller plus loin, ouvrir le `.blend` avec le MCP Blender + BlenderKit et remplacer un
+objet par un asset en gardant son nom et sa collection (`Room`, `Item_<id>`, `Char_<nom>`).
+
 ## Assets de remplacement à substituer
 
-- Sprites : chaque `Sprite2D` utilise un `PlaceholderTexture2D` teinté via `self_modulate`.
-  Remplacer `texture` par vos PNG et remettre `self_modulate` à blanc.
-- Tuiles : `FloorTiles` / `WallTiles` partagent un `TileSet` 32×32 sans source. Ajouter une
-  source atlas, peindre, puis supprimer `FloorPlaceholder` et `WallColliders`.
+- Tuiles : `FloorTiles` / `WallTiles` partagent un `TileSet` 32×32 sans source ; les murs visibles sont
+  dans le rendu, les collisions dans `WallColliders`.
 - Lumières : texture radiale générée (`GradientTexture2D`) ; remplaçable par un PNG de lumière.
 - Audio : `ambient_loop`, `evidence_sfx`, `blocked_sfx` (salle) et `sfx_preview` (paramètres) sont vides par défaut.
 - Thème UI : aucun thème ; brancher un `Theme` sur `UI` suffit.
