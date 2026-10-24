@@ -25,7 +25,8 @@ signal return_to_title_requested
 @export var enabled: bool = false:
 	set(value):
 		enabled = value
-		if not enabled and is_paused():
+		# Le setter tourne aussi au chargement du .tscn, avant l'entrée dans l'arbre.
+		if is_inside_tree() and not enabled and is_paused():
 			resume()
 
 @export var title_text: String = "Pause"
@@ -68,7 +69,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func is_paused() -> bool:
-	return get_tree().paused
+	return is_inside_tree() and get_tree().paused
 
 
 func pause() -> void:
