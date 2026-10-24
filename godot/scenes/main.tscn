@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://scenes/title_screen.tscn" id="4_title"]
 [ext_resource type="PackedScene" path="res://scenes/game_room.tscn" id="2_room"]
 [ext_resource type="PackedScene" path="res://scenes/sealed_solution.tscn" id="3_solution"]
+[ext_resource type="PackedScene" path="res://scenes/pause_menu.tscn" id="5_pause"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_main")
@@ -14,8 +15,11 @@ fade_duration = 0.6
 solution_exit_id = &"door"
 scene_holder = NodePath("SceneHolder")
 fade_overlay = NodePath("Fade/Overlay")
+pause_menu = NodePath("PauseMenu")
 
 [node name="SceneHolder" type="Node" parent="."]
+
+[node name="PauseMenu" parent="." instance=ExtResource("5_pause")]
 
 [node name="Fade" type="CanvasLayer" parent="."]
 layer = 100

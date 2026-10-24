@@ -12,6 +12,7 @@ Tout fonctionne avec des textures de remplacement (`PlaceholderTexture2D`) : auc
 ```
 Main (Node)                                     main.gd — contrôleur de flux
 ├── SceneHolder (Node)                          la scène courante est instanciée ici
+├── PauseMenu (instance de pause_menu.tscn)     menu pause, actif seulement dans la salle
 └── Fade (CanvasLayer, layer 100)
     └── Overlay (ColorRect)                     fondu au noir entre les scènes
 ```
@@ -32,6 +33,27 @@ l'écran titre. Les trois scènes ne se connaissent pas ; seul `Main` les conna�
 | `fade_duration` | `0.6` | 0 = changement instantané |
 | `solution_exit_id` | `door` | Vide = n'importe quelle sortie mène à la solution |
 | `scene_holder`, `fade_overlay` | NodePath | |
+| `pause_menu` | NodePath | Optionnel ; Main l'active en entrant dans la salle, le désactive ailleurs |
+
+## Menu pause (`scenes/pause_menu.tscn`)
+
+```
+PauseMenu (CanvasLayer, layer 50, process_mode Always)   pause_menu.gd
+└── Root (Control, plein écran, caché)
+    ├── Dim (ColorRect)                         assombrit le jeu
+    └── Center › Panel › Margin › VBox
+        ├── Title (Label)                       « Pause »
+        ├── ResumeButton (Button)               « Reprendre »
+        ├── TitleButton (Button)                « Retour au titre »
+        └── Hint (Label)
+```
+
+Échap met `get_tree().paused` à vrai et affiche le menu ; Échap ou Reprendre dépause.
+« Retour au titre » dépause d'abord puis émet `return_to_title_requested`, que `Main` écoute pour
+revenir à l'écran titre avec le fondu habituel. Le menu tourne en `PROCESS_MODE_ALWAYS` ; tout le
+reste hérite du mode par défaut et se fige. La propriété `enabled` (gérée par `Main`) bloque la
+touche hors de la salle et dépause si on la coupe en plein menu. Signaux : `paused`, `resumed`,
+`return_to_title_requested`. Libellés exportés : `title_text`, `resume_label`, `title_label_text`.
 
 ## Écran titre (`scenes/title_screen.tscn`)
 
@@ -134,6 +156,7 @@ GameRoom (Node2D)                               game_room.gd  — racine, état 
 | `music_timeline.gd` | `MusicTimeline` (Resource) | La liste de lecture ; calcule l'heure de la pause (22:05). |
 | `main.gd` | `Main` | Contrôleur de flux : titre → salle → solution scellée → titre, avec fondu. |
 | `title_screen.gd` | `TitleScreen` | Écran titre ; boutons Ouvrir / Quitter, émet `start_requested`. |
+| `pause_menu.gd` | `PauseMenu` | Menu pause (Échap) ; Reprendre, Retour au titre. |
 | `sealed_solution.gd` | `SealedSolution` | Écran de la solution ; sceau, révélation ligne par ligne. |
 | `solution_data.gd` | `SolutionData` (Resource) | Verdict, chronologie et citation de la solution. |
 
@@ -216,7 +239,7 @@ Interactable `layer=8 mask=0` · Trigger `layer=16 mask=2` · NPC `layer=4 mask=
 
 ## Entrées (`project.godot`)
 
-`move_left/right/up/down` (WASD + flèches), `interact` (E), `toggle_log` (Tab).
+`move_left/right/up/down` (WASD + flèches), `interact` (E), `toggle_log` (Tab), `pause` (Échap).
 L'invite affiche automatiquement la touche liée à `interact`.
 
 ## Assets de remplacement à substituer

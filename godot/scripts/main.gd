@@ -1,11 +1,13 @@
 class_name Main
 extends Node
 ## Contrôleur de flux : écran titre → salle de jeu → solution scellée → écran titre.
+## Possède aussi le menu pause (Échap), actif seulement pendant la salle.
 ##
 ## Instancie les scènes, écoute leurs signaux, gère le fondu. Les scènes ne se connaissent pas.
 ## Structure attendue :
 ##   Main (Node)
 ##   ├── SceneHolder (Node)          -- la scène courante vit ici
+##   ├── PauseMenu (CanvasLayer)      -- scène pause_menu.tscn instanciée
 ##   └── Fade (CanvasLayer) › Overlay (ColorRect)
 
 ## Émis quand une nouvelle scène est en place (après le fondu).
@@ -27,6 +29,8 @@ signal scene_changed(scene: Node)
 @export_group("Câblage")
 @export var scene_holder: Node
 @export var fade_overlay: ColorRect
+## Menu pause (optionnel). Activé par Main uniquement quand la salle est affichée.
+@export var pause_menu: PauseMenu
 
 var _current: Node = null
 var _switching := false
@@ -36,6 +40,9 @@ func _ready() -> void:
 	if fade_overlay:
 		fade_overlay.color.a = 1.0
 		fade_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if pause_menu:
+		pause_menu.enabled = false
+		pause_menu.return_to_title_requested.connect(_on_return_to_title_requested)
 	if title_scene:
 		await _show_title()
 	else:
@@ -61,6 +68,8 @@ func _show_room() -> void:
 		push_error("Main : room_scene n'a pas de script GameRoom.")
 		return
 	room.room_exited.connect(_on_room_exited.bind(room))
+	if pause_menu:
+		pause_menu.enabled = true
 
 
 func _show_solution(room: GameRoom) -> void:
@@ -83,6 +92,8 @@ func _switch_to(packed: PackedScene) -> Node:
 		push_error("Main : PackedScene manquante.")
 		return null
 	_switching = true
+	if pause_menu:
+		pause_menu.enabled = false  # dépause aussi si on quitte la salle en plein menu
 	await _fade(1.0)
 	if _current:
 		_current.queue_free()
@@ -134,3 +145,12 @@ func _on_start_requested() -> void:
 
 func _on_quit_requested() -> void:
 	get_tree().quit()
+
+
+func _on_return_to_title_requested() -> void:
+	if _switching:
+		return
+	if title_scene:
+		_show_title()
+	else:
+		_show_room()
