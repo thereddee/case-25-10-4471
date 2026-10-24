@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EvidenceData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/evidence_data.gd" id="1_evidence"]
+
+[resource]
+script = ExtResource("1_evidence")
+id = &"bronze_dragon"
+title = "Dragon de bronze"
+description = "Sur la tablette derrière la chaise du DM, à portée de main de quelqu'un assis à sa droite. Trop propre : essuyée, remise exactement à sa place. Le socle a la forme de la blessure. À {pause_time}, quelqu'un l'a prise, puis a mis la musique en pause pour écouter si la voisine réagissait."
+requires = Array[StringName]([&"phone_playlist", &"character_sheet"])
+locked_text = "Une statuette de dragon sur la tablette derrière la chaise du DM. Rien ne vous y attire pour l'instant."

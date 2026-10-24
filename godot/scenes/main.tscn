@@ -1,0 +1,38 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="PackedScene" path="res://scenes/title_screen.tscn" id="4_title"]
+[ext_resource type="PackedScene" path="res://scenes/game_room.tscn" id="2_room"]
+[ext_resource type="PackedScene" path="res://scenes/sealed_solution.tscn" id="3_solution"]
+[ext_resource type="PackedScene" path="res://scenes/pause_menu.tscn" id="5_pause"]
+[ext_resource type="PackedScene" path="res://scenes/settings_menu.tscn" id="6_settings"]
+
+[node name="Main" type="Node"]
+script = ExtResource("1_main")
+title_scene = ExtResource("4_title")
+room_scene = ExtResource("2_room")
+solution_scene = ExtResource("3_solution")
+fade_duration = 0.6
+solution_exit_id = &"door"
+scene_holder = NodePath("SceneHolder")
+fade_overlay = NodePath("Fade/Overlay")
+pause_menu = NodePath("PauseMenu")
+settings_menu = NodePath("SettingsMenu")
+
+[node name="SceneHolder" type="Node" parent="."]
+
+[node name="PauseMenu" parent="." instance=ExtResource("5_pause")]
+
+[node name="SettingsMenu" parent="." instance=ExtResource("6_settings")]
+
+[node name="Fade" type="CanvasLayer" parent="."]
+layer = 100
+
+[node name="Overlay" type="ColorRect" parent="Fade"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EvidenceData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/evidence_data.gd" id="1_evidence"]
+
+[resource]
+script = ExtResource("1_evidence")
+id = &"satchel"
+title = "Cartable de Julien"
+description = "Plein de matériel de jeu : cartes, figurines, écrans. Au fond, dans une pochette : un d20 confisqué, lourd d'un côté. Celui de Samuel. Il n'est donc jamais remonté le chercher."
+requires = Array[StringName]([])
+locked_text = "Rien de notable pour l'instant."

@@ -1,0 +1,153 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/settings_menu.gd" id="1_settings"]
+
+[node name="SettingsMenu" type="CanvasLayer"]
+process_mode = 3
+layer = 60
+script = ExtResource("1_settings")
+title_text = "Paramètres"
+back_label = "Retour"
+root = NodePath("Root")
+title_label = NodePath("Root/Center/Panel/Margin/VBox/Title")
+master_slider = NodePath("Root/Center/Panel/Margin/VBox/MasterRow/Slider")
+master_value = NodePath("Root/Center/Panel/Margin/VBox/MasterRow/Value")
+music_slider = NodePath("Root/Center/Panel/Margin/VBox/MusicRow/Slider")
+music_value = NodePath("Root/Center/Panel/Margin/VBox/MusicRow/Value")
+sfx_slider = NodePath("Root/Center/Panel/Margin/VBox/SfxRow/Slider")
+sfx_value = NodePath("Root/Center/Panel/Margin/VBox/SfxRow/Value")
+back_button = NodePath("Root/Center/Panel/Margin/VBox/BackButton")
+hint_label = NodePath("Root/Center/Panel/Margin/VBox/Hint")
+preview_player = NodePath("PreviewPlayer")
+
+[node name="PreviewPlayer" type="AudioStreamPlayer" parent="."]
+bus = &"SFX"
+
+[node name="Root" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dim" type="ColorRect" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.7)
+
+[node name="Center" type="CenterContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Root/Center"]
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Root/Center/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="Root/Center/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="Root/Center/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.5, 1)
+theme_override_font_sizes/font_size = 20
+text = "Paramètres"
+horizontal_alignment = 1
+
+[node name="MasterRow" type="HBoxContainer" parent="Root/Center/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Name" type="Label" parent="Root/Center/Panel/Margin/VBox/MasterRow"]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+text = "Général"
+
+[node name="Slider" type="HSlider" parent="Root/Center/Panel/Margin/VBox/MasterRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="Value" type="Label" parent="Root/Center/Panel/Margin/VBox/MasterRow"]
+custom_minimum_size = Vector2(52, 0)
+layout_mode = 2
+text = "100 %"
+horizontal_alignment = 2
+
+[node name="MusicRow" type="HBoxContainer" parent="Root/Center/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Name" type="Label" parent="Root/Center/Panel/Margin/VBox/MusicRow"]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+text = "Musique"
+
+[node name="Slider" type="HSlider" parent="Root/Center/Panel/Margin/VBox/MusicRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="Value" type="Label" parent="Root/Center/Panel/Margin/VBox/MusicRow"]
+custom_minimum_size = Vector2(52, 0)
+layout_mode = 2
+text = "100 %"
+horizontal_alignment = 2
+
+[node name="SfxRow" type="HBoxContainer" parent="Root/Center/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Name" type="Label" parent="Root/Center/Panel/Margin/VBox/SfxRow"]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+text = "Effets"
+
+[node name="Slider" type="HSlider" parent="Root/Center/Panel/Margin/VBox/SfxRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="Value" type="Label" parent="Root/Center/Panel/Margin/VBox/SfxRow"]
+custom_minimum_size = Vector2(52, 0)
+layout_mode = 2
+text = "100 %"
+horizontal_alignment = 2
+
+[node name="BackButton" type="Button" parent="Root/Center/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Retour"
+
+[node name="Hint" type="Label" parent="Root/Center/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
+theme_override_font_sizes/font_size = 12
+text = "Échap · retour"
+horizontal_alignment = 1

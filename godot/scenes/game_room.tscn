@@ -1,0 +1,536 @@
+[gd_scene load_steps=35 format=3]
+
+[ext_resource type="Script" path="res://scripts/game_room.gd" id="1_room"]
+[ext_resource type="Script" path="res://scripts/room_player.gd" id="2_player"]
+[ext_resource type="Script" path="res://scripts/interactable.gd" id="3_interactable"]
+[ext_resource type="Script" path="res://scripts/room_npc.gd" id="4_npc"]
+[ext_resource type="Script" path="res://scripts/room_trigger.gd" id="5_trigger"]
+[ext_resource type="Resource" path="res://resources/music_timeline.tres" id="6_timeline"]
+[ext_resource type="Resource" path="res://resources/evidence/phone_playlist.tres" id="7_phone"]
+[ext_resource type="Resource" path="res://resources/evidence/dm_notebook.tres" id="8_notebook"]
+[ext_resource type="Resource" path="res://resources/evidence/pizza_box.tres" id="9_pizza"]
+[ext_resource type="Resource" path="res://resources/evidence/treasury_ledger.tres" id="10_ledger"]
+[ext_resource type="Resource" path="res://resources/evidence/character_sheet.tres" id="11_sheet"]
+[ext_resource type="Resource" path="res://resources/evidence/dm_screen.tres" id="12_screen"]
+[ext_resource type="Resource" path="res://resources/evidence/satchel.tres" id="13_satchel"]
+[ext_resource type="Resource" path="res://resources/evidence/bronze_dragon.tres" id="14_dragon"]
+
+[sub_resource type="TileSet" id="TileSet_room"]
+tile_size = Vector2i(32, 32)
+physics_layer_0/collision_layer = 1
+physics_layer_0/collision_mask = 0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_h"]
+size = Vector2(640, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_v"]
+size = Vector2(16, 448)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_table"]
+size = Vector2(192, 96)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_chair"]
+size = Vector2(28, 28)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_shelf"]
+size = Vector2(20, 96)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_counter"]
+size = Vector2(64, 128)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_item"]
+size = Vector2(24, 24)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_body"]
+radius = 10.0
+height = 28.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_door"]
+size = Vector2(24, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_window"]
+size = Vector2(160, 24)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_stain"]
+size = Vector2(40, 32)
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_table"]
+size = Vector2(192, 96)
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_chair"]
+size = Vector2(28, 28)
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_shelf"]
+size = Vector2(20, 96)
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_counter"]
+size = Vector2(64, 128)
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_item"]
+size = Vector2(24, 24)
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_body"]
+size = Vector2(20, 28)
+
+[sub_resource type="Gradient" id="Gradient_light"]
+offsets = PackedFloat32Array(0, 0.6, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.35, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_light"]
+gradient = SubResource("Gradient_light")
+width = 256
+height = 256
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.5, 0)
+
+[node name="GameRoom" type="Node2D"]
+script = ExtResource("1_room")
+music_timeline = ExtResource("6_timeline")
+scream_time = "21:12"
+departure_time = "21:30"
+ledger_time = "20:50"
+pizza_slices_at_closing = 2
+pizza_slices_found = 1
+player = NodePath("Player")
+interactables_root = NodePath("Interactables")
+triggers_root = NodePath("Triggers")
+npcs_root = NodePath("NPCs")
+exit_trigger_id = &"door"
+narrator_name = "Constat"
+ambient_player = NodePath("Audio/AmbientPlayer")
+sfx_player = NodePath("Audio/SfxPlayer")
+prompt_label = NodePath("UI/InteractPrompt")
+dialogue_box = NodePath("UI/DialogueBox")
+dialogue_speaker = NodePath("UI/DialogueBox/Margin/VBox/Speaker")
+dialogue_text = NodePath("UI/DialogueBox/Margin/VBox/Text")
+evidence_log = NodePath("UI/EvidenceLog")
+evidence_list = NodePath("UI/EvidenceLog/Margin/VBox/List")
+evidence_counter = NodePath("UI/EvidenceLog/Margin/VBox/Counter")
+
+[node name="Environment" type="Node2D" parent="."]
+
+[node name="FloorTiles" type="TileMapLayer" parent="Environment"]
+tile_set = SubResource("TileSet_room")
+
+[node name="WallTiles" type="TileMapLayer" parent="Environment"]
+tile_set = SubResource("TileSet_room")
+
+[node name="FloorPlaceholder" type="Polygon2D" parent="Environment"]
+z_index = -10
+color = Color(0.23, 0.18, 0.14, 1)
+polygon = PackedVector2Array(0, 0, 640, 0, 640, 448, 0, 448)
+
+[node name="Rug" type="Polygon2D" parent="Environment"]
+z_index = -9
+position = Vector2(320, 200)
+color = Color(0.36, 0.15, 0.15, 1)
+polygon = PackedVector2Array(-150, -100, 150, -100, 150, 100, -150, 100)
+
+[node name="BloodStain" type="Polygon2D" parent="Environment"]
+z_index = -8
+position = Vector2(470, 250)
+color = Color(0.35, 0.03, 0.04, 1)
+polygon = PackedVector2Array(-18, -10, -6, -16, 10, -12, 20, -2, 14, 12, 0, 16, -14, 10, -20, 2)
+
+[node name="WallColliders" type="StaticBody2D" parent="Environment"]
+collision_layer = 1
+collision_mask = 0
+
+[node name="Top" type="CollisionShape2D" parent="Environment/WallColliders"]
+position = Vector2(320, 8)
+shape = SubResource("RectangleShape2D_wall_h")
+
+[node name="Bottom" type="CollisionShape2D" parent="Environment/WallColliders"]
+position = Vector2(320, 440)
+shape = SubResource("RectangleShape2D_wall_h")
+
+[node name="Left" type="CollisionShape2D" parent="Environment/WallColliders"]
+position = Vector2(8, 224)
+shape = SubResource("RectangleShape2D_wall_v")
+
+[node name="Right" type="CollisionShape2D" parent="Environment/WallColliders"]
+position = Vector2(632, 224)
+shape = SubResource("RectangleShape2D_wall_v")
+
+[node name="Props" type="Node2D" parent="Environment"]
+
+[node name="GameTable" type="StaticBody2D" parent="Environment/Props"]
+position = Vector2(320, 200)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Environment/Props/GameTable"]
+shape = SubResource("RectangleShape2D_table")
+
+[node name="Sprite" type="Sprite2D" parent="Environment/Props/GameTable"]
+modulate = Color(0.45, 0.3, 0.18, 1)
+texture = SubResource("PlaceholderTexture2D_table")
+
+[node name="DMChair" type="StaticBody2D" parent="Environment/Props"]
+position = Vector2(456, 200)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Environment/Props/DMChair"]
+shape = SubResource("RectangleShape2D_chair")
+
+[node name="Sprite" type="Sprite2D" parent="Environment/Props/DMChair"]
+modulate = Color(0.2, 0.2, 0.25, 1)
+texture = SubResource("PlaceholderTexture2D_chair")
+
+[node name="Shelf" type="StaticBody2D" parent="Environment/Props"]
+position = Vector2(496, 200)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Environment/Props/Shelf"]
+shape = SubResource("RectangleShape2D_shelf")
+
+[node name="Sprite" type="Sprite2D" parent="Environment/Props/Shelf"]
+modulate = Color(0.3, 0.22, 0.16, 1)
+texture = SubResource("PlaceholderTexture2D_shelf")
+
+[node name="Counter" type="StaticBody2D" parent="Environment/Props"]
+position = Vector2(96, 96)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Environment/Props/Counter"]
+shape = SubResource("RectangleShape2D_counter")
+
+[node name="Sprite" type="Sprite2D" parent="Environment/Props/Counter"]
+modulate = Color(0.55, 0.55, 0.5, 1)
+texture = SubResource("PlaceholderTexture2D_counter")
+
+[node name="Lighting" type="Node2D" parent="."]
+
+[node name="Ambient" type="CanvasModulate" parent="Lighting"]
+color = Color(0.5, 0.5, 0.62, 1)
+
+[node name="CeilingLamp" type="PointLight2D" parent="Lighting"]
+position = Vector2(320, 200)
+color = Color(1, 0.92, 0.78, 1)
+energy = 1.4
+texture = SubResource("GradientTexture2D_light")
+texture_scale = 3.0
+
+[node name="StreetGlow" type="PointLight2D" parent="Lighting"]
+position = Vector2(320, 16)
+color = Color(0.6, 0.7, 1, 1)
+energy = 0.8
+texture = SubResource("GradientTexture2D_light")
+texture_scale = 1.6
+
+[node name="Interactables" type="Node2D" parent="."]
+
+[node name="PhonePlaylist" type="Area2D" parent="Interactables"]
+position = Vector2(260, 236)
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("3_interactable")
+evidence = ExtResource("7_phone")
+prompt_verb = "Regarder"
+
+[node name="Shape" type="CollisionShape2D" parent="Interactables/PhonePlaylist"]
+shape = SubResource("RectangleShape2D_item")
+
+[node name="Sprite" type="Sprite2D" parent="Interactables/PhonePlaylist"]
+self_modulate = Color(0.15, 0.15, 0.18, 1)
+texture = SubResource("PlaceholderTexture2D_item")
+
+[node name="TreasuryLedger" type="Area2D" parent="Interactables"]
+position = Vector2(300, 164)
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("3_interactable")
+evidence = ExtResource("10_ledger")
+prompt_verb = "Lire"
+
+[node name="Shape" type="CollisionShape2D" parent="Interactables/TreasuryLedger"]
+shape = SubResource("RectangleShape2D_item")
+
+[node name="Sprite" type="Sprite2D" parent="Interactables/TreasuryLedger"]
+self_modulate = Color(0.85, 0.75, 0.5, 1)
+texture = SubResource("PlaceholderTexture2D_item")
+
+[node name="DMNotebook" type="Area2D" parent="Interactables"]
+position = Vector2(400, 164)
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("3_interactable")
+evidence = ExtResource("8_notebook")
+prompt_verb = "Lire"
+
+[node name="Shape" type="CollisionShape2D" parent="Interactables/DMNotebook"]
+shape = SubResource("RectangleShape2D_item")
+
+[node name="Sprite" type="Sprite2D" parent="Interactables/DMNotebook"]
+self_modulate = Color(0.9, 0.9, 0.8, 1)
+texture = SubResource("PlaceholderTexture2D_item")
+
+[node name="DMScreen" type="Area2D" parent="Interactables"]
+position = Vector2(400, 236)
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("3_interactable")
+evidence = ExtResource("12_screen")
+prompt_verb = "Ouvrir"
+
+[node name="Shape" type="CollisionShape2D" parent="Interactables/DMScreen"]
+shape = SubResource("RectangleShape2D_item")
+
+[node name="Sprite" type="Sprite2D" parent="Interactables/DMScreen"]
+self_modulate = Color(0.3, 0.1, 0.1, 1)
+texture = SubResource("PlaceholderTexture2D_item")
+
+[node name="CharacterSheet" type="Area2D" parent="Interactables"]
+position = Vector2(360, 236)
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("3_interactable")
+evidence = ExtResource("11_sheet")
+
+[node name="Shape" type="CollisionShape2D" parent="Interactables/CharacterSheet"]
+shape = SubResource("RectangleShape2D_item")
+
+[node name="Sprite" type="Sprite2D" parent="Interactables/CharacterSheet"]
+self_modulate = Color(0.95, 0.9, 0.85, 1)
+texture = SubResource("PlaceholderTexture2D_item")
+
+[node name="PizzaBox" type="Area2D" parent="Interactables"]
+position = Vector2(96, 72)
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("3_interactable")
+evidence = ExtResource("9_pizza")
+prompt_verb = "Ouvrir"
+
+[node name="Shape" type="CollisionShape2D" parent="Interactables/PizzaBox"]
+shape = SubResource("RectangleShape2D_item")
+
+[node name="Sprite" type="Sprite2D" parent="Interactables/PizzaBox"]
+self_modulate = Color(0.8, 0.6, 0.3, 1)
+texture = SubResource("PlaceholderTexture2D_item")
+
+[node name="Satchel" type="Area2D" parent="Interactables"]
+position = Vector2(240, 300)
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("3_interactable")
+evidence = ExtResource("13_satchel")
+prompt_verb = "Fouiller"
+
+[node name="Shape" type="CollisionShape2D" parent="Interactables/Satchel"]
+shape = SubResource("RectangleShape2D_item")
+
+[node name="Sprite" type="Sprite2D" parent="Interactables/Satchel"]
+self_modulate = Color(0.25, 0.2, 0.3, 1)
+texture = SubResource("PlaceholderTexture2D_item")
+
+[node name="BronzeDragon" type="Area2D" parent="Interactables"]
+position = Vector2(496, 176)
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("3_interactable")
+evidence = ExtResource("14_dragon")
+one_shot = true
+
+[node name="Shape" type="CollisionShape2D" parent="Interactables/BronzeDragon"]
+shape = SubResource("RectangleShape2D_item")
+
+[node name="Sprite" type="Sprite2D" parent="Interactables/BronzeDragon"]
+self_modulate = Color(0.7, 0.5, 0.2, 1)
+texture = SubResource("PlaceholderTexture2D_item")
+
+[node name="Triggers" type="Node2D" parent="."]
+
+[node name="DoorTrigger" type="Area2D" parent="Triggers"]
+position = Vector2(28, 384)
+collision_layer = 16
+collision_mask = 2
+script = ExtResource("5_trigger")
+trigger_id = &"door"
+required_evidence = Array[StringName]([&"bronze_dragon"])
+enter_text = "Vous refermez la porte sur l'appartement. Lavoie attend dans le couloir : « Je veux voir ce qu'il gardait derrière cet écran. »"
+blocked_text = "Lavoie, sans lever les yeux : « Pas avant d'avoir tout vu. »"
+one_shot = true
+
+[node name="Shape" type="CollisionShape2D" parent="Triggers/DoorTrigger"]
+shape = SubResource("RectangleShape2D_door")
+
+[node name="WindowTrigger" type="Area2D" parent="Triggers"]
+position = Vector2(320, 28)
+collision_layer = 16
+collision_mask = 2
+script = ExtResource("5_trigger")
+trigger_id = &"window"
+enter_text = "La fenêtre donne sur la rue. Une auto garée là a vue directe sur l'entrée de l'immeuble et sur cette fenêtre."
+
+[node name="Shape" type="CollisionShape2D" parent="Triggers/WindowTrigger"]
+shape = SubResource("RectangleShape2D_window")
+
+[node name="BloodStainTrigger" type="Area2D" parent="Triggers"]
+position = Vector2(470, 250)
+collision_layer = 16
+collision_mask = 2
+script = ExtResource("5_trigger")
+trigger_id = &"blood_stain"
+enter_text = "Le sang est tombé sur le tapis, pas sur la table : la table était déjà rangée. Julien était assis à sa place, quelqu'un debout à sa droite."
+one_shot = true
+
+[node name="Shape" type="CollisionShape2D" parent="Triggers/BloodStainTrigger"]
+shape = SubResource("RectangleShape2D_stain")
+
+[node name="NPCs" type="Node2D" parent="."]
+
+[node name="Lavoie" type="CharacterBody2D" parent="NPCs"]
+position = Vector2(96, 360)
+collision_layer = 4
+collision_mask = 1
+script = ExtResource("4_npc")
+npc_name = "Sgt-dét. Lavoie"
+lines = Array[String](["Le cri de {scream_time}, c'est ça, notre heure du décès. Les quatre étaient partis à {departure_time}. Prouvez-moi le contraire.", "Donc le cri ne voulait rien dire. Quelqu'un se trouvait dans cet appartement à {pause_time}. Je ne leur ai pas posé les bonnes questions.", "Deux d'entre eux ont menti. L'un est resté dehors, l'autre est remonté. Le jeu pourra peut-être les départager.", "Un paladin qui vole son propre temple. Caron a écrit ça pour une seule personne à la table.", "Il allait la démasquer deux fois : une fois comme paladin, une fois comme voleuse. Elle n'avait qu'à empêcher la première."])
+
+[node name="Shape" type="CollisionShape2D" parent="NPCs/Lavoie"]
+shape = SubResource("CapsuleShape2D_body")
+
+[node name="Sprite" type="Sprite2D" parent="NPCs/Lavoie"]
+self_modulate = Color(0.35, 0.4, 0.55, 1)
+texture = SubResource("PlaceholderTexture2D_body")
+
+[node name="Player" type="CharacterBody2D" parent="."]
+position = Vector2(160, 384)
+collision_layer = 2
+collision_mask = 5
+script = ExtResource("2_player")
+move_speed = 140.0
+interact_distance = 40.0
+initial_facing = Vector2(0, -1)
+
+[node name="Shape" type="CollisionShape2D" parent="Player"]
+shape = SubResource("CapsuleShape2D_body")
+
+[node name="Sprite" type="Sprite2D" parent="Player"]
+self_modulate = Color(0.85, 0.75, 0.6, 1)
+texture = SubResource("PlaceholderTexture2D_body")
+
+[node name="InteractRay" type="RayCast2D" parent="Player"]
+target_position = Vector2(0, -40)
+collision_mask = 12
+collide_with_areas = true
+collide_with_bodies = true
+
+[node name="Camera" type="Camera2D" parent="Player"]
+limit_left = 0
+limit_top = 0
+limit_right = 640
+limit_bottom = 448
+position_smoothing_enabled = true
+
+[node name="Audio" type="Node" parent="."]
+
+[node name="AmbientPlayer" type="AudioStreamPlayer" parent="Audio"]
+volume_db = -8.0
+bus = &"Music"
+
+[node name="SfxPlayer" type="AudioStreamPlayer" parent="Audio"]
+bus = &"SFX"
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="HelpLabel" type="Label" parent="UI"]
+offset_left = 12.0
+offset_top = 8.0
+offset_right = 400.0
+offset_bottom = 28.0
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 0.8)
+theme_override_font_sizes/font_size = 12
+text = "WASD / flèches : bouger · E : examiner · Tab : journal des preuves"
+
+[node name="InteractPrompt" type="Label" parent="UI"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -220.0
+offset_top = -60.0
+offset_right = 220.0
+offset_bottom = -36.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 0.95, 0.8, 1)
+text = "[E] Examiner"
+horizontal_alignment = 1
+
+[node name="DialogueBox" type="PanelContainer" parent="UI"]
+visible = false
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -136.0
+offset_right = -16.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Margin" type="MarginContainer" parent="UI/DialogueBox"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="VBox" type="VBoxContainer" parent="UI/DialogueBox/Margin"]
+layout_mode = 2
+
+[node name="Speaker" type="Label" parent="UI/DialogueBox/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.5, 1)
+text = "Constat"
+
+[node name="Text" type="RichTextLabel" parent="UI/DialogueBox/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+
+[node name="Hint" type="Label" parent="UI/DialogueBox/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+theme_override_font_sizes/font_size = 12
+text = "E · continuer"
+horizontal_alignment = 2
+
+[node name="EvidenceLog" type="PanelContainer" parent="UI"]
+visible = false
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -248.0
+offset_top = 32.0
+offset_right = -16.0
+offset_bottom = 256.0
+grow_horizontal = 0
+
+[node name="Margin" type="MarginContainer" parent="UI/EvidenceLog"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBox" type="VBoxContainer" parent="UI/EvidenceLog/Margin"]
+layout_mode = 2
+
+[node name="Counter" type="Label" parent="UI/EvidenceLog/Margin/VBox"]
+layout_mode = 2
+text = "Preuves : 0 / 0"
+
+[node name="List" type="ItemList" parent="UI/EvidenceLog/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
