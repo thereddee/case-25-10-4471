@@ -9,11 +9,14 @@ extends Control
 ##       ├── Title (Label)       -- « Dossier 25-10-4471 — Caron, Julien »
 ##       ├── Subtitle (Label)
 ##       ├── StartButton (Button)
+##       ├── SettingsButton (Button)
 ##       ├── QuitButton (Button) -- masqué automatiquement sur le web
 ##       └── Hint (Label)
 
 ## Émis quand le joueur lance l'enquête.
 signal start_requested
+## Émis quand le joueur ouvre les paramètres.
+signal settings_requested
 ## Émis quand le joueur veut quitter le jeu.
 signal quit_requested
 
@@ -21,6 +24,7 @@ signal quit_requested
 @export var title_text: String = "Dossier 25-10-4471 — Caron, Julien"
 @export_multiline var subtitle_text: String = "Le sgt-dét. Lavoie a demandé un deuxième avis.\nLa scène est encore telle qu'on l'a trouvée."
 @export var start_label: String = "Ouvrir le dossier"
+@export var settings_label: String = "Paramètres"
 @export var quit_label: String = "Quitter"
 ## Si vrai, la touche « interact » / ui_accept lance aussi l'enquête.
 @export var start_on_interact: bool = true
@@ -30,6 +34,7 @@ signal quit_requested
 @export var title_label: Label
 @export var subtitle_label: Label
 @export var start_button: Button
+@export var settings_button: Button
 @export var quit_button: Button
 @export var hint_label: Label
 
@@ -47,6 +52,9 @@ func _ready() -> void:
 		start_button.text = start_label
 		start_button.pressed.connect(request_start)
 		start_button.grab_focus()
+	if settings_button:
+		settings_button.text = settings_label
+		settings_button.pressed.connect(request_settings)
 	if quit_button:
 		quit_button.text = quit_label
 		quit_button.pressed.connect(request_quit)
@@ -74,12 +82,24 @@ func request_start() -> void:
 	start_requested.emit()
 
 
+func request_settings() -> void:
+	settings_requested.emit()
+
+
 func request_quit() -> void:
 	quit_requested.emit()
+
+
+## Redonne le focus au bouton principal (après la fermeture des paramètres).
+func focus_default() -> void:
+	if start_button:
+		start_button.grab_focus()
 
 
 func _set_buttons_enabled(enabled: bool) -> void:
 	if start_button:
 		start_button.disabled = not enabled
+	if settings_button:
+		settings_button.disabled = not enabled
 	if quit_button:
 		quit_button.disabled = not enabled

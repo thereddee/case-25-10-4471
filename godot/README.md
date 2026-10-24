@@ -13,6 +13,7 @@ Tout fonctionne avec des textures de remplacement (`PlaceholderTexture2D`) : auc
 Main (Node)                                     main.gd — contrôleur de flux
 ├── SceneHolder (Node)                          la scène courante est instanciée ici
 ├── PauseMenu (instance de pause_menu.tscn)     menu pause, actif seulement dans la salle
+├── SettingsMenu (instance de settings_menu.tscn) volumes ; placé après PauseMenu pour recevoir l'input d'abord
 └── Fade (CanvasLayer, layer 100)
     └── Overlay (ColorRect)                     fondu au noir entre les scènes
 ```
@@ -34,6 +35,7 @@ l'écran titre. Les trois scènes ne se connaissent pas ; seul `Main` les conna�
 | `solution_exit_id` | `door` | Vide = n'importe quelle sortie mène à la solution |
 | `scene_holder`, `fade_overlay` | NodePath | |
 | `pause_menu` | NodePath | Optionnel ; Main l'active en entrant dans la salle, le désactive ailleurs |
+| `settings_menu` | NodePath | Optionnel ; ouvert sur `settings_requested` du titre ou de la pause. Sans lui, Main applique quand même les volumes sauvegardés |
 
 ## Menu pause (`scenes/pause_menu.tscn`)
 
@@ -44,6 +46,7 @@ PauseMenu (CanvasLayer, layer 50, process_mode Always)   pause_menu.gd
     └── Center › Panel › Margin › VBox
         ├── Title (Label)                       « Pause »
         ├── ResumeButton (Button)               « Reprendre »
+        ├── SettingsButton (Button)             « Paramètres »
         ├── TitleButton (Button)                « Retour au titre »
         └── Hint (Label)
 ```
@@ -53,7 +56,38 @@ PauseMenu (CanvasLayer, layer 50, process_mode Always)   pause_menu.gd
 revenir à l'écran titre avec le fondu habituel. Le menu tourne en `PROCESS_MODE_ALWAYS` ; tout le
 reste hérite du mode par défaut et se fige. La propriété `enabled` (gérée par `Main`) bloque la
 touche hors de la salle et dépause si on la coupe en plein menu. Signaux : `paused`, `resumed`,
-`return_to_title_requested`. Libellés exportés : `title_text`, `resume_label`, `title_label_text`.
+`settings_requested`, `return_to_title_requested`. Libellés exportés : `title_text`, `resume_label`,
+`settings_label`, `title_label_text`.
+
+## Menu Paramètres (`scenes/settings_menu.tscn`)
+
+```
+SettingsMenu (CanvasLayer, layer 60, process_mode Always)   settings_menu.gd
+├── PreviewPlayer (AudioStreamPlayer, bus SFX)  joue `sfx_preview` au relâchement du slider Effets
+└── Root (Control, plein écran, caché)
+    ├── Dim (ColorRect)
+    └── Center › Panel › Margin › VBox
+        ├── Title (Label)                       « Paramètres »
+        ├── MasterRow / MusicRow / SfxRow (HBoxContainer) › Name (Label), Slider (HSlider), Value (Label)
+        ├── BackButton (Button)                 « Retour »
+        └── Hint (Label)
+```
+
+Trois bus dans `default_bus_layout.tres` : `Master`, `Music` (AmbientPlayer de la salle) et
+`SFX` (SfxPlayer, aperçu). Les sliders vont de 0 à 1 (linéaire), convertis en dB à l'application ;
+sous 0,1 % le bus est coupé plutôt que mis à -80 dB. Les valeurs sont appliquées en direct et
+sauvegardées à la fermeture dans `user://settings.cfg`, section `[audio]`.
+
+`scripts/audio_settings.gd` (`AudioSettings`, RefCounted) porte la persistance et l'application,
+sans UI : `load_or_default()`, `save()`, `apply()`, `set_volume(bus, linear)`. Pour ajouter un bus,
+l'ajouter à `AudioSettings.BUSES`, au `default_bus_layout.tres`, et câbler une ligne de plus dans
+le menu (`_rows` dans `settings_menu.gd`).
+
+Ouvert depuis l'écran titre (bouton Paramètres) ou le menu pause (le jeu reste en pause). Tant
+qu'il est ouvert il avale l'input non géré, donc E ou Échap n'atteignent pas l'écran dessous ;
+Échap ou Retour le ferme et `Main` rend le focus clavier à l'écran d'origine (`focus_default()`).
+Signaux : `opened`, `closed`, `volume_changed(bus, linear)`. Exports : `title_text`, `back_label`,
+`sfx_preview`, et les NodePath de l'UI.
 
 ## Écran titre (`scenes/title_screen.tscn`)
 
@@ -65,12 +99,13 @@ TitleScreen (Control)                           title_screen.gd
     ├── Title (Label)                           « Dossier 25-10-4471 — Caron, Julien »
     ├── Subtitle (Label)
     ├── StartButton (Button)                    « Ouvrir le dossier »
+    ├── SettingsButton (Button)                 « Paramètres »
     ├── QuitButton (Button)                     masqué si OS.has_feature("web")
     └── Hint (Label)
 ```
 
-Signaux : `start_requested`, `quit_requested`. Textes et libellés sont des `@export`
-(`unit_text`, `title_text`, `subtitle_text`, `start_label`, `quit_label`) ; `start_on_interact`
+Signaux : `start_requested`, `settings_requested`, `quit_requested`. Textes et libellés sont des
+`@export` (`unit_text`, `title_text`, `subtitle_text`, `start_label`, `settings_label`, `quit_label`) ; `start_on_interact`
 permet de lancer avec E / Entrée. Les nœuds UI sont des NodePath optionnels.
 
 ## Solution scellée (`scenes/sealed_solution.tscn`)
@@ -156,7 +191,9 @@ GameRoom (Node2D)                               game_room.gd  — racine, état 
 | `music_timeline.gd` | `MusicTimeline` (Resource) | La liste de lecture ; calcule l'heure de la pause (22:05). |
 | `main.gd` | `Main` | Contrôleur de flux : titre → salle → solution scellée → titre, avec fondu. |
 | `title_screen.gd` | `TitleScreen` | Écran titre ; boutons Ouvrir / Quitter, émet `start_requested`. |
-| `pause_menu.gd` | `PauseMenu` | Menu pause (Échap) ; Reprendre, Retour au titre. |
+| `pause_menu.gd` | `PauseMenu` | Menu pause (Échap) ; Reprendre, Paramètres, Retour au titre. |
+| `settings_menu.gd` | `SettingsMenu` | Menu Paramètres ; sliders Général / Musique / Effets. |
+| `audio_settings.gd` | `AudioSettings` (RefCounted) | Volumes des bus, persistés dans `user://settings.cfg`. |
 | `sealed_solution.gd` | `SealedSolution` | Écran de la solution ; sceau, révélation ligne par ligne. |
 | `solution_data.gd` | `SolutionData` (Resource) | Verdict, chronologie et citation de la solution. |
 
@@ -249,5 +286,5 @@ L'invite affiche automatiquement la touche liée à `interact`.
 - Tuiles : `FloorTiles` / `WallTiles` partagent un `TileSet` 32×32 sans source. Ajouter une
   source atlas, peindre, puis supprimer `FloorPlaceholder` et `WallColliders`.
 - Lumières : texture radiale générée (`GradientTexture2D`) ; remplaçable par un PNG de lumière.
-- Audio : `ambient_loop`, `evidence_sfx`, `blocked_sfx` sont vides par défaut.
+- Audio : `ambient_loop`, `evidence_sfx`, `blocked_sfx` (salle) et `sfx_preview` (paramètres) sont vides par défaut.
 - Thème UI : aucun thème ; brancher un `Theme` sur `UI` suffit.

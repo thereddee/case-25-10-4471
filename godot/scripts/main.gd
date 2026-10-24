@@ -1,13 +1,16 @@
 class_name Main
 extends Node
 ## Contrôleur de flux : écran titre → salle de jeu → solution scellée → écran titre.
-## Possède aussi le menu pause (Échap), actif seulement pendant la salle.
+## Possède aussi le menu pause (Échap), actif seulement pendant la salle, et le menu
+## Paramètres (volumes), ouvert depuis le titre ou la pause.
 ##
 ## Instancie les scènes, écoute leurs signaux, gère le fondu. Les scènes ne se connaissent pas.
 ## Structure attendue :
 ##   Main (Node)
 ##   ├── SceneHolder (Node)          -- la scène courante vit ici
 ##   ├── PauseMenu (CanvasLayer)      -- scène pause_menu.tscn instanciée
+##   ├── SettingsMenu (CanvasLayer)   -- scène settings_menu.tscn instanciée, après PauseMenu
+##                                       pour recevoir l'input en premier
 ##   └── Fade (CanvasLayer) › Overlay (ColorRect)
 
 ## Émis quand une nouvelle scène est en place (après le fondu).
@@ -31,6 +34,8 @@ signal scene_changed(scene: Node)
 @export var fade_overlay: ColorRect
 ## Menu pause (optionnel). Activé par Main uniquement quand la salle est affichée.
 @export var pause_menu: PauseMenu
+## Menu Paramètres (optionnel). Ouvert sur settings_requested du titre ou de la pause.
+@export var settings_menu: SettingsMenu
 
 var _current: Node = null
 var _switching := false
@@ -43,6 +48,12 @@ func _ready() -> void:
 	if pause_menu:
 		pause_menu.enabled = false
 		pause_menu.return_to_title_requested.connect(_on_return_to_title_requested)
+		pause_menu.settings_requested.connect(_open_settings)
+	if settings_menu:
+		settings_menu.closed.connect(_on_settings_closed)
+	else:
+		# Sans menu, on applique quand même les volumes sauvegardés.
+		AudioSettings.load_or_default().apply()
 	if title_scene:
 		await _show_title()
 	else:
@@ -59,6 +70,7 @@ func _show_title() -> void:
 		return
 	title.start_requested.connect(_on_start_requested, CONNECT_ONE_SHOT)
 	title.quit_requested.connect(_on_quit_requested, CONNECT_ONE_SHOT)
+	title.settings_requested.connect(_open_settings)
 
 
 func _show_room() -> void:
@@ -94,6 +106,8 @@ func _switch_to(packed: PackedScene) -> Node:
 	_switching = true
 	if pause_menu:
 		pause_menu.enabled = false  # dépause aussi si on quitte la salle en plein menu
+	if settings_menu:
+		settings_menu.close()
 	await _fade(1.0)
 	if _current:
 		_current.queue_free()
@@ -145,6 +159,19 @@ func _on_start_requested() -> void:
 
 func _on_quit_requested() -> void:
 	get_tree().quit()
+
+
+func _open_settings() -> void:
+	if settings_menu and not _switching:
+		settings_menu.open()
+
+
+## Rend le focus clavier à l'écran qui a ouvert les paramètres.
+func _on_settings_closed() -> void:
+	if pause_menu and pause_menu.is_paused():
+		pause_menu.focus_default()
+	elif _current and _current.has_method("focus_default"):
+		_current.focus_default()
 
 
 func _on_return_to_title_requested() -> void:

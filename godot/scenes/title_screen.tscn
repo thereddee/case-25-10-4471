@@ -15,12 +15,14 @@ title_text = "Dossier 25-10-4471 — Caron, Julien"
 subtitle_text = "Le sgt-dét. Lavoie a demandé un deuxième avis.
 La scène est encore telle qu'on l'a trouvée."
 start_label = "Ouvrir le dossier"
+settings_label = "Paramètres"
 quit_label = "Quitter"
 start_on_interact = true
 unit_label = NodePath("Center/Panel/Margin/VBox/Unit")
 title_label = NodePath("Center/Panel/Margin/VBox/Title")
 subtitle_label = NodePath("Center/Panel/Margin/VBox/Subtitle")
 start_button = NodePath("Center/Panel/Margin/VBox/StartButton")
+settings_button = NodePath("Center/Panel/Margin/VBox/SettingsButton")
 quit_button = NodePath("Center/Panel/Margin/VBox/QuitButton")
 hint_label = NodePath("Center/Panel/Margin/VBox/Hint")
 
@@ -83,6 +85,12 @@ custom_minimum_size = Vector2(220, 44)
 layout_mode = 2
 size_flags_horizontal = 4
 text = "Ouvrir le dossier"
+
+[node name="SettingsButton" type="Button" parent="Center/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(220, 36)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Paramètres"
 
 [node name="QuitButton" type="Button" parent="Center/Panel/Margin/VBox"]
 custom_minimum_size = Vector2(220, 36)

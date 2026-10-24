@@ -11,6 +11,7 @@ extends CanvasLayer
 ##       └── Center › Panel › Margin › VBox
 ##           ├── Title (Label)
 ##           ├── ResumeButton (Button)
+##           ├── SettingsButton (Button)
 ##           ├── TitleButton (Button)
 ##           └── Hint (Label)
 
@@ -18,6 +19,8 @@ extends CanvasLayer
 signal paused
 ## Émis quand le jeu reprend.
 signal resumed
+## Émis quand le joueur ouvre les paramètres (le jeu reste en pause).
+signal settings_requested
 ## Émis quand le joueur demande le retour à l'écran titre (le jeu est déjà dépausé).
 signal return_to_title_requested
 
@@ -31,12 +34,14 @@ signal return_to_title_requested
 
 @export var title_text: String = "Pause"
 @export var resume_label: String = "Reprendre"
+@export var settings_label: String = "Paramètres"
 @export var title_label_text: String = "Retour au titre"
 
 @export_group("UI")
 @export var root: Control
 @export var title_label: Label
 @export var resume_button: Button
+@export var settings_button: Button
 @export var title_button: Button
 @export var hint_label: Label
 
@@ -50,6 +55,9 @@ func _ready() -> void:
 	if resume_button:
 		resume_button.text = resume_label
 		resume_button.pressed.connect(resume)
+	if settings_button:
+		settings_button.text = settings_label
+		settings_button.pressed.connect(settings_requested.emit)
 	if title_button:
 		title_button.text = title_label_text
 		title_button.pressed.connect(request_return_to_title)
@@ -90,6 +98,12 @@ func resume() -> void:
 	if root:
 		root.visible = false
 	resumed.emit()
+
+
+## Redonne le focus au bouton Reprendre (après la fermeture des paramètres).
+func focus_default() -> void:
+	if is_paused() and resume_button:
+		resume_button.grab_focus()
 
 
 ## Dépause d'abord, pour que le fondu de Main puisse tourner, puis signale la demande.

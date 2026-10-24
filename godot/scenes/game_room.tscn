@@ -432,10 +432,10 @@ position_smoothing_enabled = true
 
 [node name="AmbientPlayer" type="AudioStreamPlayer" parent="Audio"]
 volume_db = -8.0
-bus = &"Master"
+bus = &"Music"
 
 [node name="SfxPlayer" type="AudioStreamPlayer" parent="Audio"]
-bus = &"Master"
+bus = &"SFX"
 
 [node name="UI" type="CanvasLayer" parent="."]
 

@@ -9,10 +9,12 @@ script = ExtResource("1_pause")
 enabled = false
 title_text = "Pause"
 resume_label = "Reprendre"
+settings_label = "Paramètres"
 title_label_text = "Retour au titre"
 root = NodePath("Root")
 title_label = NodePath("Root/Center/Panel/Margin/VBox/Title")
 resume_button = NodePath("Root/Center/Panel/Margin/VBox/ResumeButton")
+settings_button = NodePath("Root/Center/Panel/Margin/VBox/SettingsButton")
 title_button = NodePath("Root/Center/Panel/Margin/VBox/TitleButton")
 hint_label = NodePath("Root/Center/Panel/Margin/VBox/Hint")
 
@@ -68,6 +70,11 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 text = "Reprendre"
+
+[node name="SettingsButton" type="Button" parent="Root/Center/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+text = "Paramètres"
 
 [node name="TitleButton" type="Button" parent="Root/Center/Panel/Margin/VBox"]
 custom_minimum_size = Vector2(0, 36)
