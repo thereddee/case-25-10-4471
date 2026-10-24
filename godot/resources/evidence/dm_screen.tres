@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EvidenceData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/evidence_data.gd" id="1_evidence"]
+
+[resource]
+script = ExtResource("1_evidence")
+id = &"dm_screen"
+title = "Écran du DM"
+description = "Collé à l'intérieur de l'écran : « mot de passe du wiki = FOR, SAG, CHA du traître, six chiffres ». Un bout de papier plié en Écriture de l'Aube dépasse d'un rabat."
+requires = Array[StringName]([])
+locked_text = "Rien de notable pour l'instant."

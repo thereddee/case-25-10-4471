@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EvidenceData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/evidence_data.gd" id="1_evidence"]
+
+[resource]
+script = ExtResource("1_evidence")
+id = &"treasury_ledger"
+title = "Registre du Trésor de l'Aube"
+description = "Remis aux joueurs à {ledger_time}. Trois vols : 3 Brumaire 611, 14 Finfrimas 611, 22 Redoux 612. Dans la marge, en Écriture de l'Aube : « Le Gardien dit une seule main ». Trois des montants ne sont pas inventés : ce sont des retraits du compte de la Société des Vingt Faces."
+requires = Array[StringName]([])
+locked_text = "Rien de notable pour l'instant."

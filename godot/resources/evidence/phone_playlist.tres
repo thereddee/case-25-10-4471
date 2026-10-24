@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EvidenceData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/evidence_data.gd" id="1_evidence"]
+
+[resource]
+script = ExtResource("1_evidence")
+id = &"phone_playlist"
+title = "Téléphone de Julien"
+description = "Posé sur la table, écran allumé. La liste de lecture est en pause : piste {paused_track}, {paused_offset}. Le bloc-notes dit que la musique a démarré à {music_start}, et la règle de la maison veut qu'elle n'arrête jamais. {elapsed_minutes} minutes de musique : la pause est tombée à {pause_time}, bien après le cri de {scream_time}."
+requires = Array[StringName]([])
+locked_text = "Rien de notable pour l'instant."

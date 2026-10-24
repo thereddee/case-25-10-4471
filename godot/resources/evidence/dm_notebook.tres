@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EvidenceData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/evidence_data.gd" id="1_evidence"]
+
+[resource]
+script = ExtResource("1_evidence")
+id = &"dm_notebook"
+title = "Bloc-notes du DM"
+description = "Tour 6 : la magicienne de Karine meurt. Karine crie ({scream_time}). La partie continue trois tours de plus. Fin de séance à {departure_time}, sur une promesse : « la semaine prochaine, le traître sera démasqué ». Note en marge : musique lancée cinq minutes après la pizza."
+requires = Array[StringName]([])
+locked_text = "Rien de notable pour l'instant."

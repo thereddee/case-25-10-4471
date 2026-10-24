@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EvidenceData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/evidence_data.gd" id="1_evidence"]
+
+[resource]
+script = ExtResource("1_evidence")
+id = &"pizza_box"
+title = "Boîte de pizza végétarienne"
+description = "Six pointes au départ. Karine et Maude en ont mangé deux chacune ; il en restait {slices_at_closing} dans la boîte refermée à {departure_time}. Ce matin il en reste {slices_found}, à côté d'une assiette et d'une croûte. Julien était allergique aux noix. Quelqu'un est revenu manger ici."
+requires = Array[StringName]([])
+locked_text = "Rien de notable pour l'instant."

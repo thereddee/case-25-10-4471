@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EvidenceData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/evidence_data.gd" id="1_evidence"]
+
+[resource]
+script = ExtResource("1_evidence")
+id = &"character_sheet"
+title = "Feuille de personnage : Ser Aldric"
+description = "Trouvée sous l'avant-bras de Julien, tachée de sang. Ser Aldric, paladin, Champion de l'Aube. FOR 18, SAG 12, CHA 16. Joué par Maude Lefebvre, qui jure ne jamais rien laisser chez Julien et dit être partie la première avec son cartable."
+requires = Array[StringName]([])
+locked_text = "Rien de notable pour l'instant."
