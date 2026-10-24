@@ -1,6 +1,6 @@
 class_name Main
 extends Node
-## Contrôleur de flux : salle de jeu → solution scellée → salle de jeu.
+## Contrôleur de flux : écran titre → salle de jeu → solution scellée → écran titre.
 ##
 ## Instancie les scènes, écoute leurs signaux, gère le fondu. Les scènes ne se connaissent pas.
 ## Structure attendue :
@@ -11,6 +11,8 @@ extends Node
 ## Émis quand une nouvelle scène est en place (après le fondu).
 signal scene_changed(scene: Node)
 
+## Écran titre (doit avoir un script TitleScreen). Vide = on démarre directement dans la salle.
+@export var title_scene: PackedScene
 ## Scène de la salle (doit avoir un script GameRoom).
 @export var room_scene: PackedScene
 ## Scène de la solution scellée (doit avoir un script SealedSolution).
@@ -34,10 +36,23 @@ func _ready() -> void:
 	if fade_overlay:
 		fade_overlay.color.a = 1.0
 		fade_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	await _show_room()
+	if title_scene:
+		await _show_title()
+	else:
+		await _show_room()
 
 
 # --- Transitions --------------------------------------------------------------------------
+
+func _show_title() -> void:
+	var scene := await _switch_to(title_scene)
+	var title := scene as TitleScreen
+	if title == null:
+		push_error("Main : title_scene n'a pas de script TitleScreen.")
+		return
+	title.start_requested.connect(_on_start_requested, CONNECT_ONE_SHOT)
+	title.quit_requested.connect(_on_quit_requested, CONNECT_ONE_SHOT)
+
 
 func _show_room() -> void:
 	var scene := await _switch_to(room_scene)
@@ -104,5 +119,18 @@ func _on_room_exited(exit_id: StringName, room: GameRoom) -> void:
 
 
 func _on_solution_closed() -> void:
+	if _switching:
+		return
+	if title_scene:
+		_show_title()
+	else:
+		_show_room()
+
+
+func _on_start_requested() -> void:
 	if not _switching:
 		_show_room()
+
+
+func _on_quit_requested() -> void:
+	get_tree().quit()

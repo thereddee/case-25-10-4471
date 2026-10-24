@@ -16,19 +16,40 @@ Main (Node)                                     main.gd — contrôleur de flux
     └── Overlay (ColorRect)                     fondu au noir entre les scènes
 ```
 
-`Main` instancie `game_room.tscn`, écoute `GameRoom.room_exited(exit_id)`. Quand `exit_id`
+`Main` affiche d'abord `title_screen.tscn` et attend `TitleScreen.start_requested` (bouton,
+E ou Entrée ; `quit_requested` ferme le jeu, le bouton Quitter est masqué sur le web). Il
+instancie ensuite `game_room.tscn` et écoute `GameRoom.room_exited(exit_id)`. Quand `exit_id`
 vaut `solution_exit_id` (défaut `door`), il attend la fermeture du dialogue de sortie
 (`dialogue_closed`), fond au noir, remplace la salle par `sealed_solution.tscn`, lui passe le
-récapitulatif des preuves via `present(collected, total)`, puis écoute `closed` pour relancer la
-salle. Les deux scènes ne se connaissent pas ; seul `Main` connaît les deux.
+récapitulatif des preuves via `present(collected, total)`, puis écoute `closed` pour revenir à
+l'écran titre. Les trois scènes ne se connaissent pas ; seul `Main` les connaît.
 
 | Propriété de `Main` | Défaut | Note |
 |---|---|---|
+| `title_scene` | `title_screen.tscn` | Vide = on démarre directement dans la salle |
 | `room_scene` / `solution_scene` | les deux `.tscn` | PackedScene interchangeables |
 | `solution_data` | vide | Remplace la ressource de la scène de solution si assignée |
 | `fade_duration` | `0.6` | 0 = changement instantané |
 | `solution_exit_id` | `door` | Vide = n'importe quelle sortie mène à la solution |
 | `scene_holder`, `fade_overlay` | NodePath | |
+
+## Écran titre (`scenes/title_screen.tscn`)
+
+```
+TitleScreen (Control)                           title_screen.gd
+├── Background (ColorRect)
+└── Center (CenterContainer) › Panel (PanelContainer) › Margin › VBox
+    ├── Unit (Label)                            « Section des crimes majeurs »
+    ├── Title (Label)                           « Dossier 25-10-4471 — Caron, Julien »
+    ├── Subtitle (Label)
+    ├── StartButton (Button)                    « Ouvrir le dossier »
+    ├── QuitButton (Button)                     masqué si OS.has_feature("web")
+    └── Hint (Label)
+```
+
+Signaux : `start_requested`, `quit_requested`. Textes et libellés sont des `@export`
+(`unit_text`, `title_text`, `subtitle_text`, `start_label`, `quit_label`) ; `start_on_interact`
+permet de lancer avec E / Entrée. Les nœuds UI sont des NodePath optionnels.
 
 ## Solution scellée (`scenes/sealed_solution.tscn`)
 
@@ -111,7 +132,8 @@ GameRoom (Node2D)                               game_room.gd  — racine, état 
 | `room_trigger.gd` | `RoomTrigger` | Zone environnementale. Émet `player_entered` / `player_exited`. |
 | `evidence_data.gd` | `EvidenceData` (Resource) | Données d'une preuve : id, titre, description, prérequis. |
 | `music_timeline.gd` | `MusicTimeline` (Resource) | La liste de lecture ; calcule l'heure de la pause (22:05). |
-| `main.gd` | `Main` | Contrôleur de flux : salle → solution scellée → salle, avec fondu. |
+| `main.gd` | `Main` | Contrôleur de flux : titre → salle → solution scellée → titre, avec fondu. |
+| `title_screen.gd` | `TitleScreen` | Écran titre ; boutons Ouvrir / Quitter, émet `start_requested`. |
 | `sealed_solution.gd` | `SealedSolution` | Écran de la solution ; sceau, révélation ligne par ligne. |
 | `solution_data.gd` | `SolutionData` (Resource) | Verdict, chronologie et citation de la solution. |
 
