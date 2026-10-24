@@ -108,6 +108,16 @@ func has_evidence(id: StringName) -> bool:
 	return _collected.has(id)
 
 
+## Nombre total de pièces présentes dans la salle.
+func evidence_total() -> int:
+	return _all_evidence_ids.size()
+
+
+## Vrai tant qu'une boîte de dialogue est affichée.
+func is_dialogue_open() -> bool:
+	return _dialogue_open
+
+
 ## Progression de l'enquête dans [0, 1].
 func progress() -> float:
 	if _all_evidence_ids.is_empty():

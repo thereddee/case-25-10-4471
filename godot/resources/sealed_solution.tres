@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="SolutionData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/solution_data.gd" id="1_solution"]
+
+[resource]
+script = ExtResource("1_solution")
+title = "Solution scellée — Dossier 25-10-4471"
+seal_text = "À n'ouvrir qu'une fois le dossier clos."
+verdict = "Maude Lefebvre a tué Julien Caron, pour l'empêcher de révéler l'argent pris au club."
+entries = Array[String](["[b]20 h 50[/b] — Julien remet à ses joueurs un registre du Trésor de l'Aube. Trois de ses chiffres ne sont pas inventés. Maude, trésorière de la Société des Vingt Faces, reconnaît ses trois retraits dans le compte du club.", "[b]21 h 12[/b] — Julien tue la magicienne de Karine. Karine crie. La police bâtit sa théorie sur ce cri. Il n'a rien à voir avec la mort.", "[b]21 h 30[/b] — La partie se termine sur une promesse : la semaine prochaine, le traître sera démasqué. Tout le monde part. Étienne reconduit Karine. Samuel reste dans son auto, à écrire une publication rageuse et à se donner le courage d'aller chercher son dé pipé.", "[b]21 h 45[/b] — Maude remonte, son cartable sous le bras. Samuel voit une silhouette à capuchon entrer et renonce. En haut, Julien rouvre la boîte de pizza végétarienne et lui dit de s'asseoir. Maude pose sa feuille de personnage sur la table et lui demande d'annuler la scène. Il répond que ce sera la meilleure scène qu'il ait jamais menée.", "[b]22 h 05[/b] — Elle prend le dragon de bronze sur la tablette derrière sa chaise. Elle met la musique en pause pour écouter si la voisine réagit, essuie la statuette et laisse sa feuille là où elle est.", "[b]22 h 20[/b] — Elle écrit : « Bien rentrée. »"])
+closing_quote = "Il allait la démasquer deux fois : une fois comme paladin, une fois comme voleuse. Elle n'avait qu'à empêcher la première."
+quote_author = "Sgt-dét. Lavoie"

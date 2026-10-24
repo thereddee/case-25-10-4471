@@ -7,6 +7,56 @@ selon la progression, et la porte ne s'ouvre qu'une fois la statuette identifié
 Ouvrir ce dossier (`godot/`) comme projet dans Godot 4.3 ou plus récent et appuyer sur F5.
 Tout fonctionne avec des textures de remplacement (`PlaceholderTexture2D`) : aucun asset requis.
 
+## Flux des scènes (`scenes/main.tscn`)
+
+```
+Main (Node)                                     main.gd — contrôleur de flux
+├── SceneHolder (Node)                          la scène courante est instanciée ici
+└── Fade (CanvasLayer, layer 100)
+    └── Overlay (ColorRect)                     fondu au noir entre les scènes
+```
+
+`Main` instancie `game_room.tscn`, écoute `GameRoom.room_exited(exit_id)`. Quand `exit_id`
+vaut `solution_exit_id` (défaut `door`), il attend la fermeture du dialogue de sortie
+(`dialogue_closed`), fond au noir, remplace la salle par `sealed_solution.tscn`, lui passe le
+récapitulatif des preuves via `present(collected, total)`, puis écoute `closed` pour relancer la
+salle. Les deux scènes ne se connaissent pas ; seul `Main` connaît les deux.
+
+| Propriété de `Main` | Défaut | Note |
+|---|---|---|
+| `room_scene` / `solution_scene` | les deux `.tscn` | PackedScene interchangeables |
+| `solution_data` | vide | Remplace la ressource de la scène de solution si assignée |
+| `fade_duration` | `0.6` | 0 = changement instantané |
+| `solution_exit_id` | `door` | Vide = n'importe quelle sortie mène à la solution |
+| `scene_holder`, `fade_overlay` | NodePath | |
+
+## Solution scellée (`scenes/sealed_solution.tscn`)
+
+```
+SealedSolution (Control)                        sealed_solution.gd
+├── Background (ColorRect)
+└── Center (CenterContainer) › Envelope (PanelContainer) › Margin › VBox
+    ├── Title (Label)
+    ├── Recap (Label)                           « Preuves réunies : 8 sur 8 »
+    ├── SealButton (Button)                     « Briser le sceau »
+    ├── Content (VBoxContainer, caché)
+    │   ├── Verdict (Label)
+    │   ├── Entries (RichTextLabel, bbcode)     chronologie révélée ligne par ligne
+    │   └── Quote (Label)
+    └── Hint (Label)
+```
+
+Le joueur brise le sceau (bouton, E ou clic), puis chaque appui sur E révèle la ligne suivante.
+Une fois la dernière ligne lue, la citation de Lavoie apparaît et un dernier appui émet `closed`.
+Signaux : `seal_broken`, `fully_revealed`, `closed`.
+
+| Propriété | Défaut | Note |
+|---|---|---|
+| `solution` | `resources/sealed_solution.tres` | Ressource `SolutionData` : `title`, `seal_text`, `verdict`, `entries` (bbcode), `closing_quote`, `quote_author` |
+| `require_seal_break` | `true` | Faux = le contenu s'ouvre tout seul |
+| `auto_reveal` / `auto_reveal_interval` | `false` / `0.0` | Défilement automatique, délai en secondes entre les lignes |
+| `title_label` … `hint_label` | NodePath | Tous optionnels |
+
 ## Arbre de scène (`scenes/game_room.tscn`)
 
 ```
@@ -61,6 +111,9 @@ GameRoom (Node2D)                               game_room.gd  — racine, état 
 | `room_trigger.gd` | `RoomTrigger` | Zone environnementale. Émet `player_entered` / `player_exited`. |
 | `evidence_data.gd` | `EvidenceData` (Resource) | Données d'une preuve : id, titre, description, prérequis. |
 | `music_timeline.gd` | `MusicTimeline` (Resource) | La liste de lecture ; calcule l'heure de la pause (22:05). |
+| `main.gd` | `Main` | Contrôleur de flux : salle → solution scellée → salle, avec fondu. |
+| `sealed_solution.gd` | `SealedSolution` | Écran de la solution ; sceau, révélation ligne par ligne. |
+| `solution_data.gd` | `SolutionData` (Resource) | Verdict, chronologie et citation de la solution. |
 
 Flux d'une interaction : `RoomPlayer.interact_requested(target)` → `GameRoom` appelle
 `Interactable.interact()` → `Interactable.interacted(self)` → `GameRoom` vérifie les prérequis,
